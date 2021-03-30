@@ -37,7 +37,7 @@ class bilinear_3dnetwork(nn.Module):
         return torch.stack(output, dim=2)
 
 class CLAS(nn.Module):
-    def __init__(self, grid_shape=(256,256)):
+    def __init__(self, n_class=4, grid_shape=(256,256)):
         super(CLAS, self).__init__()
         self.conv0 = BasicBlock3D_seg_reg(1, 32)
         self.conv1 = BasicBlock3D_down_seg_reg(32, 64)
@@ -55,9 +55,9 @@ class CLAS(nn.Module):
         self.deconv4 = nn.Sequential(BasicBlock3D_seg_reg(32 + 64, 32),
                                      bilinear_3dnetwork())
         self.deconv5 = BasicBlock3D_seg_reg(32 + 32, 32)
-        self.seg = nn.Conv3d(32, 4, kernel_size=(1, 1, 1), stride=(1, 1, 1))
-        self.reg = nn.Conv3d(32, 4, kernel_size=(3, 3, 3), padding=(1, 1, 1), stride=(1, 1, 1))
-        nn.init.normal_(self.reg.weight, mean=0, std=1e-6)
+        self.seg = nn.Conv3d(32, n_class, kernel_size=(1, 1, 1), stride=(1, 1, 1))
+        self.reg = nn.Conv3d(32, n_class, kernel_size=(3, 3, 3), padding=(1, 1, 1), stride=(1, 1, 1))
+        nn.init.normal_(self.reg.weight, mean=0, std=1e-5)
         nn.init.zeros_(self.reg.bias)
         grid = torch.meshgrid(torch.linspace(-1, 1, grid_shape[0]),
                               torch.linspace(-1, 1, grid_shape[1]))
@@ -72,35 +72,27 @@ class CLAS(nn.Module):
         c3 = self.conv3(c2)
         c4 = self.conv4(c3)
         c5 = self.conv5(c4)
-        d0 = self.up_conv5(c5)
-        d1 = torch.cat((d0, c4), dim=1)
-        d2 = self.deconv1(d1)
-        d2 = torch.cat((d2, c3), dim=1)
-        d3 = self.deconv2(d2)
-        d3 = torch.cat((d3, c2), dim=1)
-        d4 = self.deconv3(d3)
-        d4 = torch.cat((d4, c1), dim=1)
-        d5 = self.deconv4(d4)
-        d5 = torch.cat((d5, c0), dim=1)
-        d6 = self.deconv5(d5)
-        seg_mask3d = self.seg(d6)
-        reg_warp3d = self.reg(d6)
+        d = self.up_conv5(c5)
+        d = torch.cat((d, c4), dim=1)
+        d = self.deconv1(d)
+        d = torch.cat((d, c3), dim=1)
+        d = self.deconv2(d)
+        d = torch.cat((d, c2), dim=1)
+        d = self.deconv3(d)
+        d = torch.cat((d, c1), dim=1)
+        d = self.deconv4(d)
+        d = torch.cat((d, c0), dim=1)
+        d = self.deconv5(d)
+        seg_mask3d = self.seg(d)
+        reg_warp3d = self.reg(d)
         reg_warp3d_forward = reg_warp3d[:,0:2]
         reg_warp3d_backward = reg_warp3d[:,2:]
         reg_warp3d_forward = reg_warp3d_forward.permute(0,2,3,4,1)
         reg_warp3d_backward = reg_warp3d_backward.permute(0,2,3,4,1)
         batch_regular_grid = self.regular_grid.repeat([x.size(0), 1, 1, 1])
-        deformal_grid_forward, warp_forward, deformal_grid_backward, warp_backward = list(), list(), list(), list()
-        # forward
-        for i in range(T-1):
-            deformal_grid_i = F.hardtanh(reg_warp3d_forward[:, i] + batch_regular_grid, -1, 1)
-            deformal_grid_forward.append(deformal_grid_i)  # b * 256 * 256 * 2
-            warp_forward.append(F.grid_sample(x[:, :, i], deformal_grid_i))  # b * 1 * 256 * 256
-        # backward
-        for i in range(T-1):
-            deformal_grid_i = F.hardtanh(reg_warp3d_backward[:, i] + batch_regular_grid, -1, 1)
-            deformal_grid_backward.append(deformal_grid_i)
-            warp_backward.append(F.grid_sample(x[:, :, i+1], deformal_grid_i))
-        return F.softmax(seg_mask3d, dim=1), \
-               torch.stack(warp_forward, dim=2), torch.stack(warp_backward, dim=2), \
-               torch.stack(deformal_grid_forward, dim=1), torch.stack(deformal_grid_backward, dim=1)
+        deformal_grid_forward, deformal_grid_backward,  = list(), list()
+        for i in range(T-1): # forward
+            deformal_grid_forward.append(F.hardtanh(reg_warp3d_forward[:, i] + batch_regular_grid, -1, 1))  # b * 256 * 256 * 2
+        for i in range(T-1): # backward
+            deformal_grid_backward.append(F.hardtanh(reg_warp3d_backward[:, i] + batch_regular_grid, -1, 1))
+        return F.softmax(seg_mask3d, dim=1), torch.stack(deformal_grid_forward, dim=1), torch.stack(deformal_grid_backward, dim=1)
