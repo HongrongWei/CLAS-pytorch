@@ -118,7 +118,7 @@ class clas_loss(nn.Module):
     def warp_label(self, label, flow):
         warp_label_class = list()
         for i in range(self.n_class):
-            warp_label_class.append(F.grid_sample(label[:, i:i+1], flow))
+            warp_label_class.append(F.grid_sample(label[:, i:i+1], flow, align_corners=True))
         return torch.cat(warp_label_class, dim=1)
 
     def forward(self, x, pred, gt):
@@ -140,10 +140,10 @@ class clas_loss(nn.Module):
         # warp original image
         warp_image_forward, warp_image_backward = list(), list()
         for i in range(T-1):
-            warp_image_forward.append(F.grid_sample(x[:, :, i], flow_forward[:, i]))
+            warp_image_forward.append(F.grid_sample(x[:, :, i], flow_forward[:, i], align_corners=True))
         warp_image_forward = torch.stack(warp_image_forward, dim=2)
         for i in range(T-1):
-            warp_image_backward.append(F.grid_sample(x[:, :, i+1], flow_backward[:, i]))
+            warp_image_backward.append(F.grid_sample(x[:, :, i+1], flow_backward[:, i], align_corners=True))
         warp_image_backward = torch.stack(warp_image_backward, dim=2)
         cc_loss_forward, cc_loss_backward, sm_loss_forward, sm_loss_backward = 0, 0, 0, 0
         for i in range(T-1):
@@ -166,8 +166,11 @@ class clas_loss(nn.Module):
         warp_label_forward = torch.stack(warp_label_forward, dim=2)
         for i in range(T-1):
             warp_label_backward.append(self.warp_label(warp_label_backward[i], flow_backward[:, T-2-i]))
-        warp_label_backward = torch.cat(warp_label_backward, dim=2)
-        warp_label_backward_rev = warp_label_backward[:,:,::-1]
+        warp_label_backward = torch.stack(warp_label_backward, dim=2)
+        warp_label_backward_rev = []
+        for i in range(T):
+            warp_label_backward_rev.append(warp_label_backward[:,:,T-1-i])
+        warp_label_backward_rev = torch.stack(warp_label_backward_rev, dim=2)
         SGS_loss = (self.soft_Diceloss(prob[:,:,1:-1], warp_label_forward[:,:,1:-1]) + self.soft_Diceloss(prob[:,:,1:-1], warp_label_backward_rev[:,:,1:-1]))/2
         OTS_loss = (self.hard_Diceloss(warp_label_forward[:,:,-1], gt[:, 1]) + self.hard_Diceloss(warp_label_backward_rev[:,:,0], gt[:, 0]))/2
         return {
