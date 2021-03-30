@@ -72,21 +72,20 @@ class cross_correlation_loss(nn.Module):
     Input:
         I & J : true X_i & pseudo X_i (forward/backward tracking)
     '''
-    def __init__(self, n=9):
+    def __init__(self):
         super(cross_correlation_loss, self).__init__()
-        self.n = n
-        self.register_buffer("sum_filter", torch.ones((1, 1, n, n)))
 
-    def forward(self, I, J):
+    def forward(self, I, J, n=9):
+        sum_filter = torch.ones((1, 1, n, n)).cuda()
         I2 = torch.mul(I, I)
         J2 = torch.mul(J, J)
         IJ = torch.mul(I, J)
-        I_sum = torch.conv2d(I, self.sum_filter, padding = self.n // 2, stride = (1, 1))
-        J_sum = torch.conv2d(J, self.sum_filter, padding = self.n // 2, stride = (1, 1))
-        I2_sum = torch.conv2d(I2, self.sum_filter, padding = self.n // 2, stride = (1, 1))
-        J2_sum = torch.conv2d(J2, self.sum_filter, padding = self.n // 2, stride = (1, 1))
-        IJ_sum = torch.conv2d(IJ, self.sum_filter, padding = self.n // 2, stride = (1, 1))
-        win_size = self.n ** 2
+        I_sum = torch.conv2d(I, sum_filter, padding = n // 2, stride = (1, 1))
+        J_sum = torch.conv2d(J, sum_filter, padding = n // 2, stride = (1, 1))
+        I2_sum = torch.conv2d(I2, sum_filter, padding = n // 2, stride = (1, 1))
+        J2_sum = torch.conv2d(J2, sum_filter, padding = n // 2, stride = (1, 1))
+        IJ_sum = torch.conv2d(IJ, sum_filter, padding = n // 2, stride = (1, 1))
+        win_size = n ** 2
         u_I = I_sum / win_size
         u_J = J_sum / win_size
         cross = IJ_sum - u_J * I_sum - u_I * J_sum + u_I * u_J * win_size
@@ -98,7 +97,7 @@ class cross_correlation_loss(nn.Module):
 class smooothing_loss(nn.Module):
     def __init__(self):
         super(smooothing_loss, self).__init__()
-    def forward(y_pred):
+    def forward(self, y_pred):
         dy = torch.abs(y_pred[:, 1:, :, :] - y_pred[:, :-1, :, :])
         dx = torch.abs(y_pred[:, :, 1:, :] - y_pred[:, :, :-1, :])
         dx = torch.mul(dx, dx)
