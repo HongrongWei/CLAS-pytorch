@@ -12,7 +12,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = "0"
 
 def adjust_learning_rate(optimizer, lr):
     for op in optimizer.param_groups:
-        op.param_groups['lr'] = lr
+        op['lr'] = lr
 
 def get_args():
     parser = OptionParser()
