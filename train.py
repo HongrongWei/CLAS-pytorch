@@ -31,6 +31,7 @@ def draw_loss_curve(loss_dict, epochs):
     plt.plot(x, np.stack(loss_dict['OTS_loss'], axis=0), 'c:', label='OTS_loss')
     plt.axvline(10, color='m', linestyle='--', label='Stage2')
     plt.legend()
+    plt.title('Training loss')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.savefig('loss_curve.png')
