@@ -1,4 +1,4 @@
-# CLAS-pytorch (Unfinished)
+# CLAS-pytorch
 This is an official implementation of "**Temporal-consistent segmentation of echocardiography with co-learning from appearance and shape**" (MICCAI 2020 early accept, Oral)
 
 [[Paper]](https://www.researchgate.net/publication/342520911_Temporal-consistent_Segmentation_of_Echocardiography_with_Co-learning_from_Appearance_and_Shape)
