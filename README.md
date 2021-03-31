@@ -9,7 +9,6 @@ This is an official implementation of "**Temporal-consistent segmentation of ech
 
 # Method (CLAS)
 ![CLAS](https://github.com/HongrongWei/CLAS-Pytorch/blob/main/misc/CLAS.jpg)
-![loss_curve](https://github.com/HongrongWei/CLAS-Pytorch/blob/main/misc/loss_curve.png)
 
 # Results (SOTA)
 
