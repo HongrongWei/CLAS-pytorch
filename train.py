@@ -7,12 +7,12 @@ import torch
 from torch import optim
 from model import CLAS
 from utils.loss import clas_loss
-#from torch.utils.data import dataloader
+import matplotlib.pyplot as plt
 os.environ['CUDA_VISIBLE_DEVICES'] = "0"
 
 def adjust_learning_rate(optimizer, lr):
-    for op in optimizer.param_groups:
-        op['lr'] = lr
+    optimizer.param_groups[0]['lr'] = lr
+    optimizer.param_groups[1]['lr'] = lr
 
 def get_args():
     parser = OptionParser()
@@ -21,6 +21,20 @@ def get_args():
     parser.add_option('-l', '--learning-rate', dest = 'lr', default = 1e-4, type='float', help='Learning rate')
     (options, args) = parser.parse_args()
     return options
+
+def draw_loss_curve(loss_dict, epochs):
+    plt.figure()
+    x = np.arange(epochs) + 1
+    plt.plot(x, np.stack(loss_dict['SGA_loss'], axis=0)-1, 'b-', label='SGA_loss-1')
+    plt.plot(x, np.stack(loss_dict['OTA_loss'], axis=0)+1, 'g--', label='OTA_loss+1')
+    plt.plot(x, np.stack(loss_dict['SGS_loss'], axis=0), 'r-.', label='SGS_loss')
+    plt.plot(x, np.stack(loss_dict['OTS_loss'], axis=0), 'c:', label='OTS_loss')
+    plt.axvline(10, color='m', linestyle='--', label='Stage2')
+    plt.legend()
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.savefig('loss_curve.png')
+    plt.close()
 
 def train_net(net,
               epochs,
@@ -38,9 +52,7 @@ def train_net(net,
     reg_params += net.reg.parameters()
     other_params = filter(lambda p: id(p) not in list(map(id, reg_params)), net.parameters())
     optimizer = optim.Adam([{'params': reg_params, 'lr': 0.5 * lr}, {'params': other_params, 'lr': lr}], weight_decay=0.0005)
-
     for epoch in range(epochs):
-        #train_Dataloader = torch.utils.data.DataLoader(train, batch_size=batch_size, shuffle=True)
         state_train = np.random.get_state()
         np.random.shuffle(train)
         np.random.set_state(state_train)
@@ -65,13 +77,14 @@ def train_net(net,
             for key, k_data in loss_dict.items():
                 Epoch_i_loss_dict[key] += k_data.item()
                 print('Epoch : {}/{} --- batch : {}/{} --- {} : {}'.format(epoch + 1, epochs, batch_i + 1, train.shape[0] // batch_size, key, k_data.item()))
-            #print('Epoch : {}/{} --- batch : {}/{} --- Tot loss : {}'.format(epoch + 1, epochs, batch_i + 1, train.shape[0] // batch_size + 1, loss.item()))
         for key, k_data in Epoch_i_loss_dict.items():
             Epoch_loss_dict[key].append(k_data / (train.shape[0] // batch_size))
             print('Epoch finished ! {} : {}'.format(key, k_data / (train.shape[0] // batch_size)))
+        if not os.path.exists('./checkpoints'):
+            os.makedirs('./checkpoints')
         torch.save(net.state_dict(), './checkpoints/' + 'CP{}.pth'.format(epoch + 1))
         print('Checkpoint saved !')
-    print('Epoch_loss_dict', Epoch_loss_dict)
+    draw_loss_curve(Epoch_loss_dict, epochs)
 
 if __name__ == '__main__':
     # load data
