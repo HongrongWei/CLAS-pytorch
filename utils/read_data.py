@@ -16,7 +16,7 @@ def sample_frames(image_sequence, info_dir, T=10):
             sample_id[j] = 1
     else: sample_id[:] = 1 # in camus dataset, all sequences have no less than 10 frames
     sample_sequence = image_sequence[sample_id > 0]
-    if int((open(info_dir, 'r')).read().split('\n')[0].split(': ')[-1]) != 1:  # Once the sequences were in the manner of ES-ED, reverse it
+    if int((open(info_dir, 'r')).read().split('\n')[0].split(': ')[-1]) != 1:  # Once the sequences were from ES to ED, reverse it
         sample_sequence = np.flipud(sample_sequence)
     return sample_sequence
 

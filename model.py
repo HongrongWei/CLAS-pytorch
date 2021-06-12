@@ -29,7 +29,7 @@ class BasicBlock3D_down_seg_reg(nn.Module):
 class bilinear_3dnetwork(nn.Module):
     def __init__(self):
         super(bilinear_3dnetwork, self).__init__()
-        self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
     def forward(self, input):
         output = list()
         for i in range(input.shape[2]):

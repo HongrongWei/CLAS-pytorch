@@ -53,6 +53,7 @@ def train_net(net,
     reg_params = list()
     reg_params += net.module.reg.parameters()
     other_params = filter(lambda p: id(p) not in list(map(id, reg_params)), net.parameters())
+    # large learning rate of registration modules would lead to unstable training because of large noise in echocardiographic sequences
     optimizer = optim.Adam([{'params': reg_params, 'lr': 0.5 * lr}, {'params': other_params, 'lr': lr}], weight_decay=0.0005)
     for epoch in range(epochs):
         state_train = np.random.get_state()
