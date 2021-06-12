@@ -69,9 +69,8 @@ pip install torch matplotlib scikit-image opencv-python SimpleITK
 ```
 python ./utils/read_data.py
 ```
-After preprocess, A2C.npy/A4C.npy (450,10,256,256) and A2C_gt.npy/A4C_gt.npy (450,2,256,256) were generated in the folder "./data/".
-
-450 patients were used for training, we sample 10 frames from each echocardiographic sequences, only end-diastole and end-systole frames have ground truths.
+After preprocess, A2C/A4C.npy with size (450, 10, 256, 256) and A2C_gt/A4C_gt.npy with size (450, 2, 256, 256) were generated for apical two-chamber and four-chamber views in the folder "./data/".
+450 means the number of patients for training, 10 means the number of sampling frames for each sequences, and only end-diastole and end-systole frames have ground truths.
 
 **Training**
 ```
