@@ -1,4 +1,4 @@
-# CLAS-pytorch
+# CLAS-pytorch (Debugging)
 This is an official implementation of "**Temporal-consistent segmentation of echocardiography with co-learning from appearance and shape**" (MICCAI 2020 early accept, Oral)
 
 [[Paper]](https://www.researchgate.net/publication/342520911_Temporal-consistent_Segmentation_of_Echocardiography_with_Co-learning_from_Appearance_and_Shape)
@@ -53,7 +53,7 @@ Note: corr: Pearson Correlation Coefficient
 * **Requirement**
 
 ```
-pip install torch matplotlib scikit-image opencv-python SimpleITK
+pip install torch matplotlib scikit-image opencv-python SimpleITK scipy imageio pillow
 ```
 
 * **Download** [dataset](https://www.creatis.insa-lyon.fr/Challenge/camus/) with following storage format:
