@@ -1,7 +1,7 @@
 import os
 from model import CLAS
 import torch
-from utils.read_data import *
+import numpy as np
 from utils.post_process import imfill_select_whole_seq
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 net = CLAS()
