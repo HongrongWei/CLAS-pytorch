@@ -48,6 +48,14 @@ MAD: Mean absolute distance
 
 Note: corr: Pearson Correlation Coefficient
 
+# Usage
+
+* **Requirement**
+
+```
+Pip install torch matplotlib scikit-image opencv-python SimpleITK
+```
+
 # Citation
 Please cite our paper if you find anything helpful:
 
