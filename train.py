@@ -4,11 +4,12 @@ import numpy as np
 from optparse import OptionParser
 import torch.backends.cudnn as cudnn
 import torch
+import torch.nn as nn
 from torch import optim
 from model import CLAS
 from utils.loss import clas_loss
 import matplotlib.pyplot as plt
-os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1, 2, 3"
 
 def adjust_learning_rate(optimizer, lr):
     optimizer.param_groups[0]['lr'] = lr
@@ -50,7 +51,7 @@ def train_net(net,
     loss_fun = clas_loss()
     Epoch_loss_dict = {'SGA_loss':[], 'OTA_loss':[], 'SGS_loss':[], 'OTS_loss':[]}
     reg_params = list()
-    reg_params += net.reg.parameters()
+    reg_params += net.module.reg.parameters()
     other_params = filter(lambda p: id(p) not in list(map(id, reg_params)), net.parameters())
     optimizer = optim.Adam([{'params': reg_params, 'lr': 0.5 * lr}, {'params': other_params, 'lr': lr}], weight_decay=0.0005)
     for epoch in range(epochs):
@@ -89,13 +90,14 @@ def train_net(net,
 
 if __name__ == '__main__':
     # load data
-    A2C = np.load('./data/A2C.npy')
-    A4C = np.load('./data/A4C.npy')
-    A2C_gt = np.load('./data/A2C_gt.npy')
-    A4C_gt = np.load('./data/A4C_gt.npy')
+    A2C = np.load('./data/A2C_train.npy')
+    A4C = np.load('./data/A4C_train.npy')
+    A2C_gt = np.load('./data/A2C_train_gt.npy')
+    A4C_gt = np.load('./data/A4C_train_gt.npy')
     train, train_gt = np.concatenate([A2C, A4C], axis=0), np.concatenate([A2C_gt, A4C_gt], axis=0)
     args = get_args()
     net = CLAS()
+    net = nn.DataParallel(net)
     net.cuda()
     cudnn.benchmark = True
     try:
