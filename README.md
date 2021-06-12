@@ -56,12 +56,27 @@ Note: corr: Pearson Correlation Coefficient
 pip install torch matplotlib scikit-image opencv-python SimpleITK
 ```
 
-* **Download** [dataset](https://www.creatis.insa-lyon.fr/Challenge/camus/) with storage format:
+* **Download** [dataset](https://www.creatis.insa-lyon.fr/Challenge/camus/) with following storage format:
 
 ```
 ./data/training/patient-id/*
-./data/test/patient-id/*
+./data/testing/patient-id/*
 ```
+
+* **Run**
+**Preprocess**
+```
+python ./utils/read_data.py
+```
+**Training**
+```
+python train.py
+```
+**Testing**
+```
+python test.py
+```
+
 
 # Citation
 Please cite our paper if you find anything helpful:
