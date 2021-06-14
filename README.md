@@ -1,8 +1,11 @@
 # CLAS-pytorch (Debugging)
-This is an official implementation of "**Temporal-consistent segmentation of echocardiography with co-learning from appearance and shape**" (MICCAI 2020 early accept, Oral)
+This is an implementation of "**Temporal-consistent segmentation of echocardiography with co-learning from appearance and shape**" (MICCAI 2020 early accept)
 
 [[Paper]](https://www.researchgate.net/publication/342520911_Temporal-consistent_Segmentation_of_Echocardiography_with_Co-learning_from_Appearance_and_Shape)
 [[Slide]](https://drive.google.com/file/d/1OHVLLxPKN9B2vqIsOZOrAKf2ZuJzSX92/view?usp=sharing)
+
+This is not the first version of the implementation of CLAS, and I found that its performance slightly worse than the MICCAI version, so I
+recommend not to use this version of code until I check out the issue.
 
 # Dataset / Challenge
 [Cardiac Acquisitions for Multi-structure Ultrasound Segmentation, CAMUS](https://www.creatis.insa-lyon.fr/Challenge/camus/index.html)
