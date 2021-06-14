@@ -5,7 +5,7 @@ This is an implementation of "**Temporal-consistent segmentation of echocardiogr
 [[Slide]](https://drive.google.com/file/d/1OHVLLxPKN9B2vqIsOZOrAKf2ZuJzSX92/view?usp=sharing)
 
 This is not the first version of the implementation of CLAS, and I found that its performance slightly worse than the MICCAI version, so I
-recommend not to use this version of code until I check out the issue.
+recommend not to use this version of code until I verify the issue.
 
 # Dataset / Challenge
 [Cardiac Acquisitions for Multi-structure Ultrasound Segmentation, CAMUS](https://www.creatis.insa-lyon.fr/Challenge/camus/index.html)
